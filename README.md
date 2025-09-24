@@ -1,0 +1,41 @@
+# Backup Manager C++
+
+A C++17 rewrite of the Python backup manager. Reads configuration from `backup.env`, performs MySQL (docker or host) dumps, archives directories, pushes to a remote backup server via SSH/SCP (using `sshpass`), optionally handles Nextcloud maintenance mode, and sends Telegram notifications.
+
+## Build
+
+Requirements: g++, make
+
+```bash
+make
+```
+
+## Config
+
+Edit `backup.env`. Keys include:
+- IS_DOCKER, IS_MYSQL, IS_NEXTCLOUD
+- SERVER_NAME
+- BACKUP_SERVER_USERNAME, BACKUP_SERVER_PASSWORD, BACKUP_SERVER_IP, BACKUP_SERVER_DEST
+- BACKUP_FILES_DIR, BACKUP_SQL_DIR
+- MYSQL_USERNAME, MYSQL_PASSWORD
+- BOT_ID, CHANNEL_ID
+- NEXTCLOUD_OCC_USER, NEXTCLOUD_OCC_PATH
+- DATABASES_<i>_DOCKER_NAME, DATABASES_<i>_NAME, DATABASES_<i>_USER, DATABASES_<i>_PASSWORD
+
+## Run
+
+```bash
+./backup_manager
+```
+
+## Cron
+
+Example crontab entry (run daily at 02:30):
+
+```cron
+30 2 * * * cd /home/USER/source/backup_manager && ./backup_manager >> /home/USER/log/backup_manager_cron.log 2>&1
+```
+
+## Notes
+- The tool relies on system utilities: `tar`, `docker` (optional), `mysqldump/mysql` (if used), `sshpass`, `rsync` (optional), and `curl` for Telegram.
+- Remote copy uses `sshpass` + `scp` to avoid adding an SSH library. You can switch to `libssh`/`libcurl` if preferred.
