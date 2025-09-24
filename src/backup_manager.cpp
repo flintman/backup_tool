@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <cstdlib>
+#include <curl/curl.h>
 
 namespace fs = std::filesystem;
 
@@ -106,14 +107,17 @@ void BackupManager::inflateConfig() {
 
     // Allow overriding local directories
     auto filesDir = get("BACKUP_FILES_DIR", "files_to");
-    auto sqlDir   = get("BACKUP_SQL_DIR",   "mysql");
+    auto sqlDir = get("BACKUP_SQL_DIR", "mysql");
 
     backupDestination = currentDir + "/" + filesDir;
     backupSqlDestination = currentDir + "/" + sqlDir;
 
     // Keep mysql dir in list
     directoriesToBackup.clear();
-    directoriesToBackup.push_back(backupSqlDestination);
+
+    if (isMysql || isDocker){
+        directoriesToBackup.push_back(backupSqlDestination);
+    }
 }
 
 void BackupManager::loadDatabasesFromConfig() {
@@ -136,10 +140,6 @@ void BackupManager::loadDatabasesFromConfig() {
     }
 }
 
-void BackupManager::addDirectoryToBackup(const std::string& directory) {
-    directoriesToBackup.push_back(directory);
-}
-
 int BackupManager::runCommand(const std::string& cmd) {
     return std::system(cmd.c_str());
 }
@@ -156,16 +156,21 @@ std::string BackupManager::runCommandCapture(const std::string& cmd) {
 
 void BackupManager::sendTelegramMessage(const std::string& message) {
     if (botId.empty() || channelId.empty()) {
-        std::cout << message << std::endl;
+        std::cout << message << " Not sent" << std::endl;
         return;
-    }
-    std::ostringstream url;
-    url << "https://api.telegram.org/bot" << botId
-        << "/sendMessage?chat_id=" << channelId
-        << "&text=" << message;
-    // Using curl to avoid bundling libs
-    runCommand("curl -s -k -X POST '" + url.str() + "' >/dev/null");
-    std::cout << message << std::endl;
+   }
+    CURL* curl = curl_easy_init();
+
+    std::string url = "https://api.telegram.org/bot" + botId +
+                      "/sendMessage?chat_id=" + channelId +
+                      "&text=" + curl_easy_escape(curl, message.c_str(), message.length());
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+
+    std::cout << "Telegram message sent: " << message << std::endl;
 }
 
 void BackupManager::clearDirectory(const std::string& directory) {
@@ -210,6 +215,15 @@ void BackupManager::backupMysqlDockerDatabases() {
 BackupResult BackupManager::backupDirectories() {
     BackupResult br;
     ensureDir(backupDestination);
+    // Load additional backup folders from config if present
+    auto folders = config.count("BACKUP_FOLDERS") ? config["BACKUP_FOLDERS"] : "";
+    if (!folders.empty()) {
+        auto extraDirs = split(folders, ',');
+        for (auto& dir : extraDirs) {
+            dir = trim(dir);
+            if (!dir.empty()) directoriesToBackup.push_back(dir);
+        }
+    }
 
     std::cout << "Starting to backup Directories" << std::endl;
 
@@ -224,7 +238,8 @@ BackupResult BackupManager::backupDirectories() {
     std::ostringstream dirs;
     for (size_t i = 0; i < directoriesToBackup.size(); ++i) {
         if (i) dirs << ' ';
-        dirs << '"' << directoriesToBackup[i] << '"';
+        dirs << directoriesToBackup[i];
+        std::cout << "Including directory in backup: " << directoriesToBackup[i] << std::endl;
     }
 
     std::ostringstream tar;
@@ -303,11 +318,14 @@ bool BackupManager::backup() {
 
     auto br = backupDirectories();
     if (br.ok) {
+        std::cout << "Pushing to backup server" << std::endl;
         pushToBackupServer(br);
     }
 
     // Clear directories like Python
-    clearDirectory(backupSqlDestination);
+    if (isMysql || isDocker) {
+        clearDirectory(backupSqlDestination);
+    }
     clearDirectory(backupDestination);
 
     if (isNextcloud) {
@@ -334,4 +352,10 @@ bool BackupManager::backup() {
     }
 
     return br.ok;
+}
+
+int main() {
+    BackupManager bm("backup.env");
+    bool ok = bm.backup();
+    return ok ? 0 : 1;
 }

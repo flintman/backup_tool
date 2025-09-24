@@ -27,9 +27,6 @@ public:
 
     bool loadConfig();
 
-    // Mirrors Python: add_directory_to_backup
-    void addDirectoryToBackup(const std::string& directory);
-
     // Full backup flow
     bool backup();
 

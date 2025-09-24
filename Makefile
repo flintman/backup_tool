@@ -3,13 +3,14 @@
 CXX ?= g++
 CXXFLAGS ?= -O2 -Wall -Wextra -std=c++17
 LDFLAGS ?=
+LIBS=-lcurl
 
 SRC_DIR := src
 INC_DIR := includes
-BIN := backup_manager
-BIN2 := backup_cleanup
+BIN := bmanager
+BIN2 := bcleanup
 
-BM_SRCS := $(SRC_DIR)/backup_manager.cpp $(SRC_DIR)/main.cpp
+BM_SRCS := $(SRC_DIR)/backup_manager.cpp
 BM_OBJS := $(BM_SRCS:.cpp=.o)
 
 BC_SRCS := $(SRC_DIR)/backup_cleanup.cpp $(SRC_DIR)/cleanup_main.cpp
@@ -21,7 +22,7 @@ all: $(BIN) $(BIN2)
 
 
 $(BIN): $(BM_OBJS)
-	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c -o $@ $<
