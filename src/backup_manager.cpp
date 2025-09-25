@@ -302,9 +302,9 @@ bool BackupManager::backup() {
     if (isNextcloud) {
         std::cout << "Putting Next Cloud into Maintenance Mode" << std::endl;
         std::ostringstream occ;
-        occ << "sudo -u '" << (config.count("NEXTCLOUD_OCC_USER") ? config["NEXTCLOUD_OCC_USER"] : "www-data")
-            << "' php '" << (config.count("NEXTCLOUD_OCC_PATH") ? config["NEXTCLOUD_OCC_PATH"] : "/var/www/html/nc_here/occ")
-            << "' maintenance:mode --on";
+        occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
+            << " php " << config["NEXTCLOUD_OCC_PATH"]
+            << " maintenance:mode --on";
         runCommand(occ.str());
     }
 
@@ -338,9 +338,9 @@ bool BackupManager::backup() {
         runCommand(cmd.str());
 
         std::ostringstream occ;
-        occ << "sudo -u '" << (config.count("NEXTCLOUD_OCC_USER") ? config["NEXTCLOUD_OCC_USER"] : "www-data")
-            << "' php '" << (config.count("NEXTCLOUD_OCC_PATH") ? config["NEXTCLOUD_OCC_PATH"] : "/var/www/html/nc_here/occ")
-            << "' maintenance:mode --off";
+        occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
+            << " php " << config["NEXTCLOUD_OCC_PATH"]
+            << " maintenance:mode --off";
         runCommand(occ.str());
     }
 
