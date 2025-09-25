@@ -329,7 +329,7 @@ bool BackupManager::backup() {
     clearDirectory(backupDestination);
 
     if (isNextcloud) {
-        std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=150m";
+        std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=200m";
         std::ostringstream cmd;
         cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
             << " /var/www/html/ "
