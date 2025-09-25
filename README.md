@@ -4,10 +4,17 @@ A C++17 rewrite of the Python backup manager. Reads configuration from `backup.e
 
 ## Build
 
-Requirements: g++, make
+Requirements: g++, make,
 
 ```bash
 make
+```
+
+
+## Requirements
+
+```bash
+sudo apt install sshpass
 ```
 
 ## Config
@@ -25,7 +32,7 @@ Edit `backup.env`. Keys include:
 ## Run
 
 ```bash
-./backup_manager
+sudo ./bmanager
 ```
 
 ## Cron
@@ -33,7 +40,7 @@ Edit `backup.env`. Keys include:
 Example crontab entry (run daily at 02:30):
 
 ```cron
-30 2 * * * cd /home/USER/source/backup_manager && ./backup_manager >> /home/USER/log/backup_manager_cron.log 2>&1
+30 2 * * * cd /home/USER/backup/ && ./bmanager > /home/USER/backup/log/backup.log 2>&1
 ```
 
 ## Notes
