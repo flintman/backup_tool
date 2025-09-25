@@ -1,6 +1,6 @@
 # Backup Manager C++
 
-A C++17 rewrite of the Python backup manager. Reads configuration from `backup.env`, performs MySQL (docker or host) dumps, archives directories, pushes to a remote backup server via SSH/SCP (using `sshpass`), optionally handles Nextcloud maintenance mode, and sends Telegram notifications.
+Backup manager, Reads configuration from `backup.env`, performs MySQL (docker or host) dumps, archives directories, pushes to a remote backup server via SSH/SCP (using `sshpass`), optionally handles Nextcloud maintenance mode, and sends Telegram notifications.
 
 ## Build
 
@@ -14,7 +14,7 @@ make
 ## Requirements
 
 ```bash
-sudo apt install sshpass
+sudo apt install tar docker.io mysql-client sshpass rsync curl
 ```
 
 ## Config
@@ -43,6 +43,3 @@ Example crontab entry (run daily at 02:30):
 30 2 * * * cd /home/USER/backup/ && ./bmanager > /home/USER/backup/log/backup.log 2>&1
 ```
 
-## Notes
-- The tool relies on system utilities: `tar`, `docker` (optional), `mysqldump/mysql` (if used), `sshpass`, `rsync` (optional), and `curl` for Telegram.
-- Remote copy uses `sshpass` + `scp` to avoid adding an SSH library. You can switch to `libssh`/`libcurl` if preferred.
