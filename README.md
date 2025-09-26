@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 William C. Bellavance Jr.
 # Backup Manager C++
 
 Backup manager, Reads configuration from `backup.env` if present in each HOME folder, performs MySQL (docker or host) dumps, archives directories, pushes to a remote backup server via SSH/SCP (using `sshpass`), optionally handles Nextcloud maintenance mode, and sends Telegram notifications.

@@ -1,5 +1,7 @@
 # Makefile for backup_manager (C++17)
 
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 William C. Bellavance Jr.
 CXX ?= g++
 CXXFLAGS ?= -O2 -Wall -Wextra -std=c++17
 LDFLAGS ?=
@@ -38,6 +40,7 @@ deb: all
 	cp $(BIN) $(DEBDIR)/usr/bin/
 	mkdir -p $(DEBDIR)/usr/share/backup_manager
 	cp backup.env $(DEBDIR)/usr/share/backup_manager/backup.env
+	cp LICENSE $(DEBDIR)/usr/share/backup_manager/LICENSE
 
 	echo "Package: $(TARGET)" > $(DEBDIR)/DEBIAN/control
 	echo "Version: $(VERSION)" >> $(DEBDIR)/DEBIAN/control
@@ -48,6 +51,7 @@ deb: all
 	echo "Description: Backup Service" >> $(DEBDIR)/DEBIAN/control
 
 	echo "#!/bin/bash" > $(DEBDIR)/DEBIAN/postinst
+
 	echo "if [ ! -f \"$(HOME)/backup/backup.env\" ]; then" >> $(DEBDIR)/DEBIAN/postinst
 	echo "  mkdir -p \"$(HOME)/backup\"" >> $(DEBDIR)/DEBIAN/postinst
 	echo "  cp /usr/share/backup_manager/backup.env \"$(HOME)/backup/backup.env\"" >> $(DEBDIR)/DEBIAN/postinst
@@ -57,7 +61,6 @@ deb: all
 	chmod 755 $(DEBDIR)/DEBIAN/postinst
 
 	dpkg-deb --build $(DEBDIR) $(BUILD_DIR)/$(TARGET)_$(VERSION)_$(ARCH).deb
-
 
 clean:
 	rm -rf $(BUILD_DIR)

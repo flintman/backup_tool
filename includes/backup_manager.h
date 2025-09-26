@@ -1,4 +1,6 @@
-// backup_manager.h
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025 William C. Bellavance Jr.
+
 #ifndef BACKUP_MANAGER_H
 #define BACKUP_MANAGER_H
 
