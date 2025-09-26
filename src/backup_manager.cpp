@@ -106,11 +106,8 @@ void BackupManager::inflateConfig() {
     channelId = get("CHANNEL_ID", "");
 
     // Allow overriding local directories
-    auto filesDir = get("BACKUP_FILES_DIR", "files_to");
-    auto sqlDir = get("BACKUP_SQL_DIR", "mysql");
-
-    backupDestination = currentDir + "/" + filesDir;
-    backupSqlDestination = currentDir + "/" + sqlDir;
+    backupDestination = get("BACKUP_FILES_DIR", "files_to");
+    backupSqlDestination = get("BACKUP_SQL_DIR", "mysql");
 
     // Keep mysql dir in list
     directoriesToBackup.clear();
@@ -355,7 +352,18 @@ bool BackupManager::backup() {
 }
 
 int main() {
-    BackupManager bm("backup.env");
-    bool ok = bm.backup();
-    return ok ? 0 : 1;
+    // If you want to backup for all users, you need to iterate over /home directories
+    // Example: backup for each user with a backup.env file
+    bool allOk = true;
+    for (const auto& entry : std::filesystem::directory_iterator("/home")) {
+        if (!entry.is_directory()) continue;
+        std::string username = entry.path().filename().string();
+        std::string configPath = "/home/" + username + "/backup/backup.env";
+        if (std::filesystem::exists(configPath)) {
+            BackupManager bm(configPath);
+            bool ok = bm.backup();
+            allOk = allOk && ok;
+        }
+    }
+    return allOk ? 0 : 1;
 }
