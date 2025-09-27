@@ -13,7 +13,7 @@ BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 BIN_DIR := $(BUILD_DIR)/bin
 TARGET := bmanager
-VERSION := 1.0.0
+VERSION := 1.0.1
 BIN := $(BIN_DIR)/$(TARGET)
 ARCH=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEBDIR=$(BUILD_DIR)/debian/$(TARGET)
@@ -41,6 +41,7 @@ deb: all
 	mkdir -p $(DEBDIR)/usr/share/backup_manager
 	cp backup.env $(DEBDIR)/usr/share/backup_manager/backup.env
 	cp LICENSE $(DEBDIR)/usr/share/backup_manager/LICENSE
+	cp VERSION.md $(DEBDIR)/usr/share/backup_manager/VERSION.md
 
 	echo "Package: $(TARGET)" > $(DEBDIR)/DEBIAN/control
 	echo "Version: $(VERSION)" >> $(DEBDIR)/DEBIAN/control
