@@ -206,7 +206,7 @@ void BackupManager::backupMysqlDockerDatabases() {
         std::string sqlFile = backupSqlDestination + "/" + dbi.name + "_" + timestamp + ".sql";
         std::ostringstream cmd;
         cmd << "docker exec " << dbi.dockerName
-            << " mysqldump -u '" << dbi.user << "' --password='" << dbi.password
+            << " mysqldump --no-tablespaces -u '" << dbi.user << "' --password='" << dbi.password
             << "' '" << dbi.name << "' > '" << sqlFile << "'";
         runCommand(cmd.str());
         std::cout << "Backup of MySQL database " << dbi.name << " completed" << std::endl;
