@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <curl/curl.h>
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
@@ -113,6 +114,8 @@ void BackupManager::inflateConfig() {
     backupDestination = get("BACKUP_FILES_DIR", "files_to");
     backupSqlDestination = get("BACKUP_SQL_DIR", "mysql");
 
+    backupsToKeep = get("TOTAL_BACKUPS_TO_KEEP", "2");
+
     // Keep mysql dir in list
     directoriesToBackup.clear();
 
@@ -179,6 +182,31 @@ void BackupManager::clearDirectory(const std::string& directory) {
     if (fs::exists(directory, ec)) fs::remove_all(directory, ec);
     fs::create_directories(directory, ec);
     std::cout << "Clearing directory: " << directory << std::endl;
+}
+
+void BackupManager::pruneRemoteBackups(const std::string& remoteDir, int backupsToKeep) {
+    // List backup directories on remote, sort by mtime, remove oldest beyond backupsToKeep-1
+    std::ostringstream listCmd;
+    listCmd << "sshpass -p '" << backupServerPass << "' ssh -o StrictHostKeyChecking=no "
+            << backupServerUser << "@" << backupServerIp << " "
+            << "\"ls -1dt '" << remoteDir << "/backup_'* 2>/dev/null\"";
+    std::string result = runCommandCapture(listCmd.str());
+    std::vector<std::string> dirs;
+    std::istringstream is(result);
+    std::string line;
+    while (std::getline(is, line)) {
+        line = trim(line);
+        if (!line.empty()) dirs.push_back(line);
+    }
+    if (dirs.size() <= size_t(backupsToKeep - 1)) return;
+    for (size_t i = backupsToKeep - 1; i < dirs.size(); ++i) {
+        std::cout << "Pruning remote backup: " << dirs[i] << std::endl;
+        std::ostringstream rmCmd;
+        rmCmd << "sshpass -p '" << backupServerPass << "' ssh -o StrictHostKeyChecking=no "
+              << backupServerUser << "@" << backupServerIp << " "
+              << "\"rm -rf '" << dirs[i] << "'\"";
+        runCommand(rmCmd.str());
+    }
 }
 
 void BackupManager::backupMysqlAllDatabases() {
@@ -319,6 +347,7 @@ bool BackupManager::backup() {
 
     auto br = backupDirectories();
     if (br.ok) {
+        pruneRemoteBackups(backupServerDest, std::stoi(backupsToKeep));
         std::cout << "Pushing to backup server" << std::endl;
         pushToBackupServer(br);
     }

@@ -35,6 +35,9 @@ public:
     const std::map<std::string, std::string>& getConfig() const { return config; }
     const std::vector<std::string>& getDirectories() const { return directoriesToBackup; }
 
+    // Prune old backups before pushing new one
+    void pruneRemoteBackups(const std::string& backupDir, int backupsToKeep);
+
 private:
     // Config and state
     std::string configPath;
@@ -57,6 +60,7 @@ private:
     std::string mysqlPass;
     std::string botId;
     std::string channelId;
+    std::string backupsToKeep;
 
     // Local folders like Python
     std::string backupDestination;   // ./files_to
