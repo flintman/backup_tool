@@ -333,7 +333,7 @@ bool BackupManager::backup() {
         std::cout << "Putting Next Cloud into Maintenance Mode" << std::endl;
         std::ostringstream occ;
         occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
-            << " php " << config["NEXTCLOUD_OCC_PATH"]
+            << " php " << config["NEXTCLOUD_PATH"] << "occ"
             << " maintenance:mode --on";
         runCommand(occ.str());
     }
@@ -363,14 +363,14 @@ bool BackupManager::backup() {
         std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=" + backupBandwidthLimit;
         std::ostringstream cmd;
         cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
-            << " /var/www/html/ "
+            << " " << config["NEXTCLOUD_PATH"] << " "
             << backupServerUser << "@" << backupServerIp << ":" << backupServerDest
             << "/backup_" << serverName << "_" << timestamp << "/";
         runCommand(cmd.str());
 
         std::ostringstream occ;
         occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
-            << " php " << config["NEXTCLOUD_OCC_PATH"]
+            << " php " << config["NEXTCLOUD_PATH"] << "occ"
             << " maintenance:mode --off";
         runCommand(occ.str());
     }
