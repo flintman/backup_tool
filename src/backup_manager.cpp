@@ -101,6 +101,7 @@ void BackupManager::inflateConfig() {
     backupServerUser = get("BACKUP_SERVER_USERNAME", "SSHUSERNAME");
     backupServerPass = get("BACKUP_SERVER_PASSWORD", "SSHPASSWORD");
     backupServerIp   = get("BACKUP_SERVER_IP", "127.0.0.1");
+    backupBandwidthLimit = get("BACKUP_BANDWIDTH_LIMIT", "200m");
     backupServerDest = get("BACKUP_SERVER_DEST", "");
     if (backupServerDest.empty()) backupServerDest = "/media/flintman/backups/" + serverName;
 
@@ -359,7 +360,7 @@ bool BackupManager::backup() {
     clearDirectory(backupDestination);
 
     if (isNextcloud) {
-        std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=200m";
+        std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=" + backupBandwidthLimit;
         std::ostringstream cmd;
         cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
             << " /var/www/html/ "

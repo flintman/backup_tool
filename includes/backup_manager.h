@@ -55,6 +55,7 @@ private:
     std::string backupServerUser;
     std::string backupServerPass;
     std::string backupServerIp;
+    std::string backupBandwidthLimit;
     std::string backupServerDest; // default: /media/flintman/backups/<serverName>
     std::string mysqlUser;
     std::string mysqlPass;
