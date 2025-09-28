@@ -12,13 +12,6 @@ Requirements: g++, make,
 make deb
 ```
 
-
-## Requirements
-
-```bash
-sudo apt install tar docker.io mysql-client sshpass rsync curl
-```
-
 ## Config
 
 Edit `/home/INSTALL_USER/backup/backup.env`. Keys include:
