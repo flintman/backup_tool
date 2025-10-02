@@ -365,7 +365,7 @@ bool BackupManager::backup() {
         cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
             << " " << config["NEXTCLOUD_PATH"] << " "
             << backupServerUser << "@" << backupServerIp << ":" << backupServerDest
-            << "/backup_" << serverName << "_" << timestamp << "/";
+            << "/backup_" << serverName << "_" << timestamp << "/nextcloud/";
         runCommand(cmd.str());
 
         std::ostringstream occ;
