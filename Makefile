@@ -50,7 +50,7 @@ deb: all
 	echo "Architecture: $(ARCH)" >> $(DEBDIR)/DEBIAN/control
 	echo "Maintainer: William Bellavance <flintman@flintmancomputers.com>" >> $(DEBDIR)/DEBIAN/control
 	echo "Description: Backup Service" >> $(DEBDIR)/DEBIAN/control
-	echo "Depends: tar, mysql-client, sshpass, rsync, curl" >> $(DEBDIR)/DEBIAN/control
+	echo "Depends: tar, sshpass, rsync, curl" >> $(DEBDIR)/DEBIAN/control
 
 	echo "#!/bin/bash" > $(DEBDIR)/DEBIAN/postinst
 
