@@ -1,3 +1,5 @@
+- 1.0.3
+    - Drop nextcloud in a folder,  looks messy the way it was
 - 1.0.2
     - Set Nexcloud pathway
     - Set bandwidth limit in config file
