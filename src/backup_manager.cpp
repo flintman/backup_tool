@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 William C. Bellavance Jr.
 
@@ -163,18 +162,26 @@ void BackupManager::sendTelegramMessage(const std::string& message) {
     if (botId.empty() || channelId.empty()) {
         std::cout << message << " Not sent" << std::endl;
         return;
-   }
+    }
     CURL* curl = curl_easy_init();
-
+    if (!curl) {
+        std::cout << "CURL init failed. Message not sent." << std::endl;
+        return;
+    }
+    char* esc = curl_easy_escape(curl, message.c_str(), message.length());
+    if (!esc) {
+        std::cout << "curl_easy_escape failed. Message not sent." << std::endl;
+        curl_easy_cleanup(curl);
+        return;
+    }
     std::string url = "https://api.telegram.org/bot" + botId +
                       "/sendMessage?chat_id=" + channelId +
-                      "&text=" + curl_easy_escape(curl, message.c_str(), message.length());
-
+                      "&text=" + esc;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     CURLcode res = curl_easy_perform(curl);
+    curl_free(esc);
     curl_easy_cleanup(curl);
-
     std::cout << "Telegram message sent: " << message << std::endl;
 }
 
