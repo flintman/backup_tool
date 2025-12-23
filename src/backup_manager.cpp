@@ -95,6 +95,8 @@ void BackupManager::inflateConfig() {
     isMysql = get("IS_MYSQL", "False") == "True" || get("IS_MYSQL", "0") == "1";
     isNextcloud = get("IS_NEXTCLOUD", "False") == "True" || get("IS_NEXTCLOUD", "0") == "1";
 
+    testing_mode = get("TESTING_MODE", "False") == "True" || get("TESTING_MODE", "0") == "1";
+
     serverName = get("SERVER_NAME", "XXXXXXXXXXX-server");
 
     backupServerUser = get("BACKUP_SERVER_USERNAME", "SSHUSERNAME");
@@ -356,8 +358,12 @@ bool BackupManager::backup() {
     auto br = backupDirectories();
     if (br.ok) {
         pruneRemoteBackups(backupServerDest, std::stoi(backupsToKeep));
-        std::cout << "Pushing to backup server" << std::endl;
-        pushToBackupServer(br);
+        if (!testing_mode) {
+            std::cout << "Pushing to backup server" << std::endl;
+            pushToBackupServer(br);
+        } else {
+            std::cout << "Testing mode enabled, not pushing to backup server" << std::endl;
+        }
     }
 
     // Clear directories like Python
@@ -367,14 +373,17 @@ bool BackupManager::backup() {
     clearDirectory(backupDestination);
 
     if (isNextcloud) {
-        std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=" + backupBandwidthLimit;
-        std::ostringstream cmd;
-        cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
-            << " " << config["NEXTCLOUD_PATH"] << " "
-            << backupServerUser << "@" << backupServerIp << ":" << backupServerDest
-            << "/backup_" << serverName << "_" << timestamp << "/nextcloud/";
-        runCommand(cmd.str());
-
+        if(!testing_mode) {
+            std::string rsyncOptions = "-avz --compress --partial --partial-dir=.rsync-partial --bwlimit=" + backupBandwidthLimit;
+            std::ostringstream cmd;
+            cmd << "sshpass -p '" << backupServerPass << "' rsync " << rsyncOptions
+                << " " << config["NEXTCLOUD_PATH"] << " "
+                << backupServerUser << "@" << backupServerIp << ":" << backupServerDest
+                << "/backup_" << serverName << "_" << timestamp << "/nextcloud/";
+            runCommand(cmd.str());
+        } else {
+            std::cout << "Testing mode enabled, not pushing Nextcloud data to backup server" << std::endl;
+        }
         std::ostringstream occ;
         occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
             << " php " << config["NEXTCLOUD_PATH"] << "occ"

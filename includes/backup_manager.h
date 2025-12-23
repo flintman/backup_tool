@@ -24,6 +24,7 @@ struct BackupResult {
 };
 
 class BackupManager {
+
 public:
     explicit BackupManager(const std::string& configPath = "backup.env");
 
@@ -51,6 +52,7 @@ private:
     bool isDocker {false};
     bool isMysql {false};
     bool isNextcloud {false};
+    bool testing_mode {false};
     std::string serverName;
     std::string backupServerUser;
     std::string backupServerPass;
