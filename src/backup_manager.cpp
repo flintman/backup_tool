@@ -340,11 +340,9 @@ bool BackupManager::backup() {
 
     if (isNextcloud) {
         std::cout << "Putting Next Cloud into Maintenance Mode" << std::endl;
-        std::ostringstream occ;
-        occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
-            << " php " << config["NEXTCLOUD_PATH"] << "occ"
-            << " maintenance:mode --on";
-        runCommand(occ.str());
+        std::string occ_on_cmd;
+        occ_on_cmd = config["NEXTCLOUD_MAINTENANCE_ON"] + " --on";
+        runCommand(occ_on_cmd);
     }
 
     if (isDocker) {
@@ -384,11 +382,9 @@ bool BackupManager::backup() {
         } else {
             std::cout << "Testing mode enabled, not pushing Nextcloud data to backup server" << std::endl;
         }
-        std::ostringstream occ;
-        occ << "sudo -u " << config["NEXTCLOUD_OCC_USER"]
-            << " php " << config["NEXTCLOUD_PATH"] << "occ"
-            << " maintenance:mode --off";
-        runCommand(occ.str());
+        std::string occ_off_cmd;
+        occ_off_cmd = config["NEXTCLOUD_MAINTENANCE_ON"] + " --off";
+        runCommand(occ_off_cmd);
     }
 
     // Telemetry: complete
