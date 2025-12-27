@@ -341,7 +341,7 @@ bool BackupManager::backup() {
     if (isNextcloud) {
         std::cout << "Putting Next Cloud into Maintenance Mode" << std::endl;
         std::string occ_on_cmd;
-        occ_on_cmd = config["NEXTCLOUD_MAINTENANCE_ON"] + " --on";
+        occ_on_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --on";
         runCommand(occ_on_cmd);
     }
 
@@ -363,12 +363,15 @@ bool BackupManager::backup() {
             std::cout << "Testing mode enabled, not pushing to backup server" << std::endl;
         }
     }
-
-    // Clear directories like Python
-    if (isMysql || isDocker) {
-        clearDirectory(backupSqlDestination);
+    if (!testing_mode) {
+        // Clear directories only if not testing
+        if (isMysql || isDocker) {
+            clearDirectory(backupSqlDestination);
+        }
+        clearDirectory(backupDestination);
+    } else {
+        std::cout << "Testing mode enabled, Check Files that would have been pushed" << std::endl;
     }
-    clearDirectory(backupDestination);
 
     if (isNextcloud) {
         if(!testing_mode) {
@@ -383,7 +386,7 @@ bool BackupManager::backup() {
             std::cout << "Testing mode enabled, not pushing Nextcloud data to backup server" << std::endl;
         }
         std::string occ_off_cmd;
-        occ_off_cmd = config["NEXTCLOUD_MAINTENANCE_ON"] + " --off";
+        occ_off_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --off";
         runCommand(occ_off_cmd);
     }
 
