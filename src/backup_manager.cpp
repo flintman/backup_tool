@@ -326,9 +326,19 @@ bool BackupManager::pushToBackupServer(const BackupResult& br) {
 }
 
 bool BackupManager::backup() {
+
     if (!loadConfig()) {
         std::cerr << "Failed to load config file: " << configPath << std::endl;
         return false;
+    }
+
+    // Run COMMAND_BEFORE_BACKUP if set
+    auto cmd_before = config.count("COMMAND_BEFORE_BACKUP") ? config["COMMAND_BEFORE_BACKUP"] : "";
+    if (!cmd_before.empty() && cmd_before != "\"") {
+        std::cout << "Running COMMAND_BEFORE_BACKUP: " << cmd_before << std::endl;
+        runCommand(cmd_before);
+    } else {
+        std::cout << "COMMAND_BEFORE_BACKUP is empty, skipping." << std::endl;
     }
 
     // Telemetry: start
@@ -340,8 +350,7 @@ bool BackupManager::backup() {
 
     if (isNextcloud) {
         std::cout << "Putting Next Cloud into Maintenance Mode" << std::endl;
-        std::string occ_on_cmd;
-        occ_on_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --on";
+        std::string occ_on_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --on";
         runCommand(occ_on_cmd);
     }
 
@@ -385,8 +394,8 @@ bool BackupManager::backup() {
         } else {
             std::cout << "Testing mode enabled, not pushing Nextcloud data to backup server" << std::endl;
         }
-        std::string occ_off_cmd;
-        occ_off_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --off";
+        std::string occ_off_cmd = config["NEXTCLOUD_MAINTENANCE"] + " --off";
+        std::cout << "Running Nextcloud maintenance command: " << occ_off_cmd << std::endl;
         runCommand(occ_off_cmd);
     }
 
@@ -397,6 +406,14 @@ bool BackupManager::backup() {
         sendTelegramMessage(msg.str());
     }
 
+    // Run COMMAND_AFTER_BACKUP if set
+    auto cmd_after = config.count("COMMAND_AFTER_BACKUP") ? config["COMMAND_AFTER_BACKUP"] : "";
+    if (!cmd_after.empty() && cmd_after != "\"") {
+        std::cout << "Running COMMAND_AFTER_BACKUP: " << cmd_after << std::endl;
+        runCommand(cmd_after);
+    } else {
+        std::cout << "COMMAND_AFTER_BACKUP is empty, skipping." << std::endl;
+    }
     return br.ok;
 }
 
