@@ -31,6 +31,16 @@ Edit `/home/INSTALL_USER/backup/backup.env`. Keys include:
 sudo bmanager
 ```
 
+### Run with a specific .env file
+
+You can now specify a custom environment file:
+
+```bash
+sudo bmanager /path/to/custom.env
+```
+
+If no argument is given, the tool will search for `backup.env` in each user's `/home/<user>/backup/` directory as before.
+
 ## Cron
 
 Example crontab entry (run daily at 02:30):

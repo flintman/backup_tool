@@ -417,19 +417,29 @@ bool BackupManager::backup() {
     return br.ok;
 }
 
-int main() {
-    // If you want to backup for all users, you need to iterate over /home directories
-    // Example: backup for each user with a backup.env file
-    bool allOk = true;
-    for (const auto& entry : std::filesystem::directory_iterator("/home")) {
-        if (!entry.is_directory()) continue;
-        std::string username = entry.path().filename().string();
-        std::string configPath = "/home/" + username + "/backup/backup.env";
-        if (std::filesystem::exists(configPath)) {
-            BackupManager bm(configPath);
-            bool ok = bm.backup();
-            allOk = allOk && ok;
+int main(int argc, char* argv[]) {
+    // Optionally allow specifying a .env file as the first argument
+    if (argc > 1) {
+        std::string configPath = argv[1];
+        if (!std::filesystem::exists(configPath)) {
+            std::cerr << "Specified env file does not exist: " << configPath << std::endl;
+            return 2;
         }
+        BackupManager bm(configPath);
+        return bm.backup() ? 0 : 1;
+    } else {
+        // Default: backup for all users with a backup.env file in /home/<user>/backup/
+        bool allOk = true;
+        for (const auto& entry : std::filesystem::directory_iterator("/home")) {
+            if (!entry.is_directory()) continue;
+            std::string username = entry.path().filename().string();
+            std::string configPath = "/home/" + username + "/backup/backup.env";
+            if (std::filesystem::exists(configPath)) {
+                BackupManager bm(configPath);
+                bool ok = bm.backup();
+                allOk = allOk && ok;
+            }
+        }
+        return allOk ? 0 : 1;
     }
-    return allOk ? 0 : 1;
 }
