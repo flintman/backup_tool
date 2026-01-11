@@ -1,3 +1,12 @@
+- 1.0.5
+    - Allow running with a specific .env file for more flexibility
+    - Add the ability to send commands before and after the backup
+    - Don't clear files if testing, see what you would have had
+    - Drop user for maintenance command
+    - Setup a test mode
+- 1.0.4
+    - Fix memory leak: don't use easy_escape directly
+    - Drop mysql dependency
 - 1.0.3
     - Drop nextcloud in a folder,  looks messy the way it was
     - Drop dependency
